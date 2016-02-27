@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		30B474A81C824620005F789E /* UIImage+FloodFill.m in Sources */ = {isa = PBXBuildFile; fileRef = 30B474A71C824620005F789E /* UIImage+FloodFill.m */; };
 		30EAB0CD1C81F1D700E55D0F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 30EAB0CC1C81F1D700E55D0F /* main.m */; };
 		30EAB0D01C81F1D700E55D0F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 30EAB0CF1C81F1D700E55D0F /* AppDelegate.m */; };
 		30EAB0D61C81F1D700E55D0F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 30EAB0D41C81F1D700E55D0F /* Main.storyboard */; };
@@ -84,6 +85,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		30B474A61C824620005F789E /* UIImage+FloodFill.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+FloodFill.h"; sourceTree = "<group>"; };
+		30B474A71C824620005F789E /* UIImage+FloodFill.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+FloodFill.m"; sourceTree = "<group>"; };
 		30EAB0C81C81F1D700E55D0F /* FloodFill.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FloodFill.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		30EAB0CC1C81F1D700E55D0F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		30EAB0CE1C81F1D700E55D0F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -230,6 +233,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		30B474A51C8245E4005F789E /* Category */ = {
+			isa = PBXGroup;
+			children = (
+				30B474A61C824620005F789E /* UIImage+FloodFill.h */,
+				30B474A71C824620005F789E /* UIImage+FloodFill.m */,
+			);
+			path = Category;
+			sourceTree = "<group>";
+		};
 		30EAB0BF1C81F1D600E55D0F = {
 			isa = PBXGroup;
 			children = (
@@ -253,6 +265,7 @@
 		30EAB0CA1C81F1D700E55D0F /* FloodFill */ = {
 			isa = PBXGroup;
 			children = (
+				30B474A51C8245E4005F789E /* Category */,
 				30FBFF521C82058800665F6C /* Library */,
 				30FBFC821C81FCA600665F6C /* Resource */,
 				30FBFC841C81FCA600665F6C /* Src */,
@@ -943,6 +956,7 @@
 				30FBFFF91C82058800665F6C /* NSObject+IDPOCExtensions.m in Sources */,
 				30FB000F1C82058900665F6C /* UIViewController+IDPInitialization.m in Sources */,
 				30FB00121C82058900665F6C /* IDPView.m in Sources */,
+				30B474A81C824620005F789E /* UIImage+FloodFill.m in Sources */,
 				30FBFFF81C82058800665F6C /* IDPOCStack.m in Sources */,
 				30FBFFF31C82058800665F6C /* IDPMutableArray.m in Sources */,
 				30FB00011C82058800665F6C /* IDPURLConnection.m in Sources */,
