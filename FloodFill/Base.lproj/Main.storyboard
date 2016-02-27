@@ -28,6 +28,9 @@
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="MUW-zu-tA7" secondAttribute="bottom" id="p0r-9f-f4w"/>
                             <constraint firstItem="MUW-zu-tA7" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="zQc-lW-4WY"/>
                         </constraints>
+                        <connections>
+                            <outlet property="imageView" destination="MUW-zu-tA7" id="hhZ-Rh-EWQ"/>
+                        </connections>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

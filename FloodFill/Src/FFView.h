@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface FFView : UIView
+@property (weak, nonatomic) IBOutlet UIImageView *imageView;
 
 @end
