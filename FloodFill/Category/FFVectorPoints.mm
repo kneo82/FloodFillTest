@@ -10,8 +10,7 @@
 
 #include <vector>
 
-static const size_t kFFReserveSize    = 5000;
-using std::vector;
+static const size_t kFFReserveSize    = 5000000;
 
 @interface FFVectorPoints () {
     std::vector<CGPoint> points;
@@ -41,8 +40,16 @@ using std::vector;
 #pragma mark -
 #pragma mark Public
 
-- (void)pushPoint:(CGPoint)point {
+- (BOOL)pushPoint:(CGPoint)point {
+    unsigned long max = points.capacity();
+    unsigned long size = points.size();
+    
+    if (size >= max) {
+        return NO;
+    }
+    
     points.push_back(point);
+    return YES;
 }
 
 - (CGPoint)popPoint {

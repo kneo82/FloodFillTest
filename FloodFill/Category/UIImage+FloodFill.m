@@ -65,19 +65,19 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
 @implementation UIImage (FloodFill)
 
 - (UIImage *)floodFillFromPoint:(CGPoint)point color:(UIColor *)color {
-    FFVectorPoints *points = [FFVectorPoints new];
-    [points pushPoint:CGPointMake(10, 10)];
-    [points pushPoint:CGPointMake(20, 20)];
-    [points pushPoint:CGPointMake(30, 30)];
-    
-    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
-    NSLog(@"- IsEmpty : %d", points.isEmpty);
-    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
-    NSLog(@"- IsEmpty : %d", points.isEmpty);
-    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
-    NSLog(@"- IsEmpty : %d", points.isEmpty);
-    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
-    NSLog(@"- IsEmpty : %d", points.isEmpty);
+//    FFVectorPoints *points = [FFVectorPoints new];
+//    [points pushPoint:CGPointMake(10, 10)];
+//    [points pushPoint:CGPointMake(20, 20)];
+//    [points pushPoint:CGPointMake(30, 30)];
+//    
+//    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
+//    NSLog(@"- IsEmpty : %d", points.isEmpty);
+//    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
+//    NSLog(@"- IsEmpty : %d", points.isEmpty);
+//    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
+//    NSLog(@"- IsEmpty : %d", points.isEmpty);
+//    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
+//    NSLog(@"- IsEmpty : %d", points.isEmpty);
     
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGImageRef imageRef = [self CGImage];
@@ -119,7 +119,7 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
     int x = roundf(point.x);
     int y = roundf(point.y);
     
-    [self floodFill4WithPoint:CGPointMake(x, y) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+    [self floodFill8StackWithPoint:CGPointMake(x, y) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
 
     CGImageRef newCGImage = CGBitmapContextCreateImage(context);
     
@@ -225,16 +225,42 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
                        imageData:(unsigned char *)imageData
                        imageInfo:(FFImageInfo)info
 {
-    NSInteger x = point.x;
-    NSInteger y = point.y;
+    if (compareRGBAColor(newColor, oldColor, 0)) {
+        return;
+    }
+    
+    FFVectorPoints *points = [FFVectorPoints new];
+    
+    static const int dx[4] = {0, 1, 0, -1}; // relative neighbor x coordinates
+    static const int dy[4] = {-1, 0, 1, 0}; // relative neighbor y coordinates
     
     CGSize size = self.size;
     CGFloat width = size.width;
     CGFloat height = size.height;
     
-    unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
+    if (![points pushPoint:point]) {
+        return;
+    }
     
-    RGBAColor color = getColorCode(byteIndex, imageData);
+    while (!points.isEmpty) {
+        CGPoint newPoint = points.popPoint;
+        [self setRGBAColor:newColor toImageData:imageData forPoint:newPoint imageInfo:info];
+        
+        for (int i = 0; i < 4; i++) {
+            int nx = newPoint.x + dx[i];
+            int ny = newPoint.y + dy[i];
+            
+            unsigned int byteIndex = (info.bytesPerRow * roundf(ny)) + roundf(nx) * info.bytesPerPixel;
+            
+            RGBAColor color = getColorCode(byteIndex, imageData);
+            
+            if(nx > 0 && nx < width && ny > 0 && ny < height && compareRGBAColor(color, oldColor, 0)) {
+                if(![points pushPoint:CGPointMake(nx, ny)]) {
+                    return;
+                }
+            }
+        }
+    }
 }
 
 - (void)floodFill8StackWithPoint:(CGPoint)point
@@ -243,16 +269,42 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
                        imageData:(unsigned char *)imageData
                        imageInfo:(FFImageInfo)info
 {
-    NSInteger x = point.x;
-    NSInteger y = point.y;
+    if (compareRGBAColor(newColor, oldColor, 0)) {
+        return;
+    }
+    
+    FFVectorPoints *points = [FFVectorPoints new];
+    
+    static const int dx[8] = {0, 1, 1, 1, 0, -1, -1, -1}; // relative neighbor x coordinates
+    static const int dy[8] = {-1, -1, 0, 1, 1, 1, 0, -1}; // relative neighbor y coordinates
     
     CGSize size = self.size;
     CGFloat width = size.width;
     CGFloat height = size.height;
     
-    unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
+    if (![points pushPoint:point]) {
+        return;
+    }
     
-    RGBAColor color = getColorCode(byteIndex, imageData);
+    while (!points.isEmpty) {
+        CGPoint newPoint = points.popPoint;
+        [self setRGBAColor:newColor toImageData:imageData forPoint:newPoint imageInfo:info];
+        
+        for (int i = 0; i < 8; i++) {
+            int nx = newPoint.x + dx[i];
+            int ny = newPoint.y + dy[i];
+            
+            unsigned int byteIndex = (info.bytesPerRow * roundf(ny)) + roundf(nx) * info.bytesPerPixel;
+            
+            RGBAColor color = getColorCode(byteIndex, imageData);
+            
+            if(nx > 0 && nx < width && ny > 0 && ny < height && compareRGBAColor(color, oldColor, 0)) {
+                if(![points pushPoint:CGPointMake(nx, ny)]) {
+                    return;
+                }
+            }
+        }
+    }
 }
 
 - (void)floodFillScanlineStackWithPoint:(CGPoint)point

@@ -13,6 +13,6 @@
 @property (nonatomic, readonly) BOOL isEmpty;
 
 - (CGPoint)popPoint;
-- (void)pushPoint:(CGPoint)point;
+- (BOOL)pushPoint:(CGPoint)point;
 
 @end
