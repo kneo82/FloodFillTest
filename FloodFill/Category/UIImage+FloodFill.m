@@ -119,7 +119,7 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
     int x = roundf(point.x);
     int y = roundf(point.y);
     
-    [self floodFill8StackWithPoint:CGPointMake(x, y) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+    [self floodFillScanlineStackWithPoint:CGPointMake(x, y) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
 
     CGImageRef newCGImage = CGBitmapContextCreateImage(context);
     
@@ -313,16 +313,60 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
                               imageData:(unsigned char *)imageData
                               imageInfo:(FFImageInfo)info
 {
-    NSInteger x = point.x;
-    NSInteger y = point.y;
+    if (compareRGBAColor(newColor, oldColor, 0)) {
+        return;
+    }
     
     CGSize size = self.size;
     CGFloat width = size.width;
     CGFloat height = size.height;
     
-    unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
+    FFVectorPoints *points = [FFVectorPoints new];
+
+    NSInteger x1;
+    bool spanAbove, spanBelow;
     
-    RGBAColor color = getColorCode(byteIndex, imageData);
+    if(![points pushPoint:point]) {
+        return;
+    }
+    
+    while(!points.isEmpty) {
+        CGPoint newPoint = points.popPoint;
+        NSInteger x = newPoint.x;
+        NSInteger y = newPoint.y;
+        
+        x1 = x;
+        while(x1 >= 0 && [self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y) imageData:imageData imageInfo:info]) {
+            x1--;
+        }
+        
+        x1++;
+        
+        spanAbove = spanBelow = 0;
+        while(x1 < width && [self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y) imageData:imageData imageInfo:info]) {
+            [self floodFillScanlineWithPoint:CGPointMake(x1, y) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+            
+            if(!spanAbove && y > 0 && [self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y - 1) imageData:imageData imageInfo:info]) {
+                if(![points pushPoint:CGPointMake(x1, y - 1)]) return;
+                spanAbove = 1;
+            }
+            
+            else if(spanAbove && y > 0 && ![self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y - 1) imageData:imageData imageInfo:info])           {
+                spanAbove = 0;
+            }
+            
+            if(!spanBelow && y < height - 1 && [self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y + 1) imageData:imageData imageInfo:info])
+            {
+                if(![points pushPoint:CGPointMake(x1, y + 1)]) return;
+                spanBelow = 1;
+            }
+            else if(spanBelow && y < height - 1 && ![self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y + 1) imageData:imageData imageInfo:info])
+            {
+                spanBelow = 0;
+            }
+            x1++;
+        }
+    }
 }
 
 - (void)floodFillScanlineWithPoint:(CGPoint)point
@@ -331,16 +375,83 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
                          imageData:(unsigned char *)imageData
                          imageInfo:(FFImageInfo)info
 {
+    if (compareRGBAColor(newColor, oldColor, 0)) {
+        return;
+    }
+    
     NSInteger x = point.x;
     NSInteger y = point.y;
     
     CGSize size = self.size;
     CGFloat width = size.width;
     CGFloat height = size.height;
+
+    if(![self compareColor:oldColor withImageColorByPoint:point imageData:imageData imageInfo:info]) {
+        return;
+    }
     
+    NSInteger x1;
+    
+    //draw current scanline from start position to the right
+    x1 = x;
+    
+    while(x1 < width && [self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y) imageData:imageData imageInfo:info] ) {
+        [self setRGBAColor:newColor toImageData:imageData forPoint:CGPointMake(x1, y) imageInfo:info];
+        x1++;
+    }
+    
+    //draw current scanline from start position to the left
+    x1 = x - 1;
+    while(x1 >= 0 && [self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y) imageData:imageData imageInfo:info]) {
+        [self setRGBAColor:newColor toImageData:imageData forPoint:CGPointMake(x1, y) imageInfo:info];
+        x1--;
+    }
+    
+    //test for new scanlines above
+    x1 = x;
+    while(x1 < width && [self compareColor:newColor withImageColorByPoint:CGPointMake(x1, y) imageData:imageData imageInfo:info]) {
+        if(y > 0 && [self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y-1) imageData:imageData imageInfo:info]) {
+            [self floodFillScanlineWithPoint:CGPointMake(x1, y - 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        }
+        
+        x1++;
+    }
+    
+    x1 = x - 1;
+    
+    while(x1 >= 0 && [self compareColor:newColor withImageColorByPoint:CGPointMake(x1, y) imageData:imageData imageInfo:info]) {
+        if(y > 0 && [self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y-1) imageData:imageData imageInfo:info]) {
+            [self floodFillScanlineWithPoint:CGPointMake(x1, y - 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        }
+        x1--;
+    }
+    
+    //test for new scanlines below
+    x1 = x;
+    
+    while(x1 < width && [self compareColor:newColor withImageColorByPoint:CGPointMake(x1, y) imageData:imageData imageInfo:info]) {
+        if(y < height - 1 && [self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y+1) imageData:imageData imageInfo:info]) {
+            [self floodFillScanlineWithPoint:CGPointMake(x1, y + 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        }
+        
+        x1++;
+    }
+    
+    x1 = x - 1;
+    while(x1 >= 0 && [self compareColor:newColor withImageColorByPoint:CGPointMake(x1, y) imageData:imageData imageInfo:info]) {
+        if(y < height - 1 && [self compareColor:oldColor withImageColorByPoint:CGPointMake(x1, y+1) imageData:imageData imageInfo:info]) {
+            [self floodFillScanlineWithPoint:CGPointMake(x1, y + 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        }
+        x1--;
+    }
+}
+
+- (BOOL)compareColor:(RGBAColor)color withImageColorByPoint:(CGPoint)point imageData:(unsigned char *)imageData imageInfo:(FFImageInfo)info {
     unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
     
-    RGBAColor color = getColorCode(byteIndex, imageData);
+    RGBAColor pointColor = getColorCode(byteIndex, imageData);
+    
+    return compareRGBAColor(color, pointColor, 0);
 }
 
 @end
