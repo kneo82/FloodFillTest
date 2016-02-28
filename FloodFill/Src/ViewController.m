@@ -29,7 +29,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    UIImage *image = [UIImage imageNamed:@"3457.gif"];
+    UIImage *image = [UIImage imageNamed:@"bf1.png"];
     self.rootView.imageView.image = image;
     self.originalImage = image;
 }

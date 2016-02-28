@@ -8,21 +8,24 @@
 
 #import "UIImage+FloodFill.h"
 
-typedef struct {
-    unsigned int red;
-    unsigned int green;
-    unsigned int blue;
-    unsigned int alpha;
-} RGBAColor;
+#import "RGBAColor.h"
+#import "FFVectorPoints.h"
 
-RGBAColor RGBAColorMake(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha) {
-    RGBAColor color;
-    color.red = red;
-    color.blue = blue;
-    color.green = green;
-    color.alpha = alpha;
+typedef struct {
+    NSUInteger bytesPerPixel;
+    NSUInteger bytesPerRow;
+    NSUInteger bitsPerComponent;
+    CGBitmapInfo bitmapInfo;
+} FFImageInfo;
+
+FFImageInfo FFImageInfoMake(NSUInteger bytesPerPixel, NSUInteger bytesPerRow, NSUInteger bitsPerComponent, CGBitmapInfo bitmapInfo) {
+    FFImageInfo info;
+    info.bytesPerPixel = bytesPerPixel;
+    info.bytesPerRow = bytesPerRow;
+    info.bitsPerComponent = bitsPerComponent;
+    info.bitmapInfo = bitmapInfo;
     
-    return color;
+    return info;
 }
 
 RGBAColor getColorCode (unsigned int byteIndex, unsigned char *imageData) {
@@ -62,6 +65,20 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
 @implementation UIImage (FloodFill)
 
 - (UIImage *)floodFillFromPoint:(CGPoint)point color:(UIColor *)color {
+    FFVectorPoints *points = [FFVectorPoints new];
+    [points pushPoint:CGPointMake(10, 10)];
+    [points pushPoint:CGPointMake(20, 20)];
+    [points pushPoint:CGPointMake(30, 30)];
+    
+    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
+    NSLog(@"- IsEmpty : %d", points.isEmpty);
+    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
+    NSLog(@"- IsEmpty : %d", points.isEmpty);
+    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
+    NSLog(@"- IsEmpty : %d", points.isEmpty);
+    NSLog(@"- 1 - %@", NSStringFromCGPoint([points popPoint]));
+    NSLog(@"- IsEmpty : %d", points.isEmpty);
+    
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGImageRef imageRef = [self CGImage];
     
@@ -80,6 +97,8 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
         bitmapInfo = (uint32_t)kCGImageAlphaPremultipliedLast;
     }
     
+    FFImageInfo info = FFImageInfoMake(bytesPerPixel, bytesPerRow, bitsPerComponent, bitmapInfo);
+    
     CGContextRef context = CGBitmapContextCreate(imageData,
                                                  width,
                                                  height,
@@ -93,14 +112,14 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
     
     unsigned int byteIndex = (bytesPerRow * roundf(point.y)) + roundf(point.x) * bytesPerPixel;
     
-    RGBAColor ocolor = getColorCode(byteIndex, imageData);
+    RGBAColor oldColor = getColorCode(byteIndex, imageData);
     
     RGBAColor newColor = convertColorToRGBAColor(color, bitmapInfo);
     
     int x = roundf(point.x);
     int y = roundf(point.y);
     
-    [self setRGBAColor:newColor toImageData:imageData forPoint:CGPointMake(x, y) withBytesPerRow:bytesPerRow bytesPerPixel:bytesPerPixel];
+    [self floodFill4WithPoint:CGPointMake(x, y) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
 
     CGImageRef newCGImage = CGBitmapContextCreateImage(context);
     
@@ -118,16 +137,158 @@ RGBAColor convertColorToRGBAColor(UIColor *newColor, CGBitmapInfo bitmapInfo) {
 - (void)setRGBAColor:(RGBAColor)color
          toImageData:(unsigned char *)imageData
             forPoint:(CGPoint)point
-     withBytesPerRow:(NSUInteger)bytesPerRow
-       bytesPerPixel:(NSUInteger)bytesPerPixel
+           imageInfo:(FFImageInfo)info
 {
-    unsigned int byteIndex = (bytesPerRow * roundf(point.y)) + roundf(point.x) * bytesPerPixel;
+    unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
     
     imageData[byteIndex + 0] = color.red;
     imageData[byteIndex + 1] = color.green;
     imageData[byteIndex + 2] = color.blue;
     imageData[byteIndex + 3] = color.alpha;
 
+}
+
+- (void)floodFill4WithPoint:(CGPoint)point
+                   newColor:(RGBAColor)newColor
+                   oldColor:(RGBAColor)oldColor
+                  imageData:(unsigned char *)imageData
+                  imageInfo:(FFImageInfo)info
+{
+    NSInteger x = point.x;
+    NSInteger y = point.y;
+    
+    CGSize size = self.size;
+    CGFloat width = size.width;
+    CGFloat height = size.height;
+    
+    unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
+    
+    RGBAColor color = getColorCode(byteIndex, imageData);
+    
+    if(x >= 0
+       && x < width
+       && y >= 0
+       && y < height
+       && compareRGBAColor(color, oldColor, 1)
+       && !compareRGBAColor(color, newColor, 1))
+    {
+        [self setRGBAColor:newColor toImageData:imageData forPoint:point imageInfo:info];
+        
+        [self floodFill4WithPoint:CGPointMake(x + 1, y) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        [self floodFill4WithPoint:CGPointMake(x - 1, y) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        [self floodFill4WithPoint:CGPointMake(x, y + 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        [self floodFill4WithPoint:CGPointMake(x, y - 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+    }   
+}
+
+- (void)floodFill8WithPoint:(CGPoint)point
+                   newColor:(RGBAColor)newColor
+                   oldColor:(RGBAColor)oldColor
+                  imageData:(unsigned char *)imageData
+                  imageInfo:(FFImageInfo)info
+{
+    NSInteger x = point.x;
+    NSInteger y = point.y;
+    
+    CGSize size = self.size;
+    CGFloat width = size.width;
+    CGFloat height = size.height;
+    
+    unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
+    
+    RGBAColor color = getColorCode(byteIndex, imageData);
+    
+    if(x >= 0
+       && x < width
+       && y >= 0
+       && y < height
+       && compareRGBAColor(color, oldColor, 1)
+       && !compareRGBAColor(color, newColor, 1))
+    {
+        [self setRGBAColor:newColor toImageData:imageData forPoint:point imageInfo:info];
+        
+        [self floodFill4WithPoint:CGPointMake(x + 1, y) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        [self floodFill4WithPoint:CGPointMake(x - 1, y) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        [self floodFill4WithPoint:CGPointMake(x, y + 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        [self floodFill4WithPoint:CGPointMake(x, y - 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        
+        [self floodFill4WithPoint:CGPointMake(x + 1, y + 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        [self floodFill4WithPoint:CGPointMake(x + 1, y - 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        [self floodFill4WithPoint:CGPointMake(x - 1, y + 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+        [self floodFill4WithPoint:CGPointMake(x - 1, y - 1) newColor:newColor oldColor:oldColor imageData:imageData imageInfo:info];
+    }
+}
+
+- (void)floodFill4StackWithPoint:(CGPoint)point
+                        newColor:(RGBAColor)newColor
+                        oldColor:(RGBAColor)oldColor
+                       imageData:(unsigned char *)imageData
+                       imageInfo:(FFImageInfo)info
+{
+    NSInteger x = point.x;
+    NSInteger y = point.y;
+    
+    CGSize size = self.size;
+    CGFloat width = size.width;
+    CGFloat height = size.height;
+    
+    unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
+    
+    RGBAColor color = getColorCode(byteIndex, imageData);
+}
+
+- (void)floodFill8StackWithPoint:(CGPoint)point
+                        newColor:(RGBAColor)newColor
+                        oldColor:(RGBAColor)oldColor
+                       imageData:(unsigned char *)imageData
+                       imageInfo:(FFImageInfo)info
+{
+    NSInteger x = point.x;
+    NSInteger y = point.y;
+    
+    CGSize size = self.size;
+    CGFloat width = size.width;
+    CGFloat height = size.height;
+    
+    unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
+    
+    RGBAColor color = getColorCode(byteIndex, imageData);
+}
+
+- (void)floodFillScanlineStackWithPoint:(CGPoint)point
+                               newColor:(RGBAColor)newColor
+                               oldColor:(RGBAColor)oldColor
+                              imageData:(unsigned char *)imageData
+                              imageInfo:(FFImageInfo)info
+{
+    NSInteger x = point.x;
+    NSInteger y = point.y;
+    
+    CGSize size = self.size;
+    CGFloat width = size.width;
+    CGFloat height = size.height;
+    
+    unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
+    
+    RGBAColor color = getColorCode(byteIndex, imageData);
+}
+
+- (void)floodFillScanlineWithPoint:(CGPoint)point
+                          newColor:(RGBAColor)newColor
+                          oldColor:(RGBAColor)oldColor
+                         imageData:(unsigned char *)imageData
+                         imageInfo:(FFImageInfo)info
+{
+    NSInteger x = point.x;
+    NSInteger y = point.y;
+    
+    CGSize size = self.size;
+    CGFloat width = size.width;
+    CGFloat height = size.height;
+    
+    unsigned int byteIndex = (info.bytesPerRow * roundf(point.y)) + roundf(point.x) * info.bytesPerPixel;
+    
+    RGBAColor color = getColorCode(byteIndex, imageData);
 }
 
 @end

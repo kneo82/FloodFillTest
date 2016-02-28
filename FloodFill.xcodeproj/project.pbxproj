@@ -7,7 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		30040BA51C8360C0003CB404 /* FFVectorPoints.mm in Sources */ = {isa = PBXBuildFile; fileRef = 30040BA41C8360C0003CB404 /* FFVectorPoints.mm */; };
 		30B474A81C824620005F789E /* UIImage+FloodFill.m in Sources */ = {isa = PBXBuildFile; fileRef = 30B474A71C824620005F789E /* UIImage+FloodFill.m */; };
+		30B474AF1C82DD0D005F789E /* bf1.png in Resources */ = {isa = PBXBuildFile; fileRef = 30B474AA1C82DD0D005F789E /* bf1.png */; };
+		30B474B01C82DD0D005F789E /* bf2.png in Resources */ = {isa = PBXBuildFile; fileRef = 30B474AB1C82DD0D005F789E /* bf2.png */; };
+		30B474B11C82DD0D005F789E /* bf3.png in Resources */ = {isa = PBXBuildFile; fileRef = 30B474AC1C82DD0D005F789E /* bf3.png */; };
+		30B474B21C82DD0D005F789E /* bf4.png in Resources */ = {isa = PBXBuildFile; fileRef = 30B474AD1C82DD0D005F789E /* bf4.png */; };
+		30B474B31C82DD0D005F789E /* bf5.png in Resources */ = {isa = PBXBuildFile; fileRef = 30B474AE1C82DD0D005F789E /* bf5.png */; };
 		30EAB0CD1C81F1D700E55D0F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 30EAB0CC1C81F1D700E55D0F /* main.m */; };
 		30EAB0D01C81F1D700E55D0F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 30EAB0CF1C81F1D700E55D0F /* AppDelegate.m */; };
 		30EAB0D61C81F1D700E55D0F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 30EAB0D41C81F1D700E55D0F /* Main.storyboard */; };
@@ -85,8 +91,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		30040BA31C8360C0003CB404 /* FFVectorPoints.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFVectorPoints.h; sourceTree = "<group>"; };
+		30040BA41C8360C0003CB404 /* FFVectorPoints.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FFVectorPoints.mm; sourceTree = "<group>"; };
 		30B474A61C824620005F789E /* UIImage+FloodFill.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+FloodFill.h"; sourceTree = "<group>"; };
 		30B474A71C824620005F789E /* UIImage+FloodFill.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+FloodFill.m"; sourceTree = "<group>"; };
+		30B474A91C82D28D005F789E /* RGBAColor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RGBAColor.h; sourceTree = "<group>"; };
+		30B474AA1C82DD0D005F789E /* bf1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bf1.png; sourceTree = "<group>"; };
+		30B474AB1C82DD0D005F789E /* bf2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bf2.png; sourceTree = "<group>"; };
+		30B474AC1C82DD0D005F789E /* bf3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bf3.png; sourceTree = "<group>"; };
+		30B474AD1C82DD0D005F789E /* bf4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bf4.png; sourceTree = "<group>"; };
+		30B474AE1C82DD0D005F789E /* bf5.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bf5.png; sourceTree = "<group>"; };
 		30EAB0C81C81F1D700E55D0F /* FloodFill.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FloodFill.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		30EAB0CC1C81F1D700E55D0F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		30EAB0CE1C81F1D700E55D0F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -238,6 +252,9 @@
 			children = (
 				30B474A61C824620005F789E /* UIImage+FloodFill.h */,
 				30B474A71C824620005F789E /* UIImage+FloodFill.m */,
+				30B474A91C82D28D005F789E /* RGBAColor.h */,
+				30040BA31C8360C0003CB404 /* FFVectorPoints.h */,
+				30040BA41C8360C0003CB404 /* FFVectorPoints.mm */,
 			);
 			path = Category;
 			sourceTree = "<group>";
@@ -309,6 +326,11 @@
 		30FBFC821C81FCA600665F6C /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				30B474AA1C82DD0D005F789E /* bf1.png */,
+				30B474AB1C82DD0D005F789E /* bf2.png */,
+				30B474AC1C82DD0D005F789E /* bf3.png */,
+				30B474AD1C82DD0D005F789E /* bf4.png */,
+				30B474AE1C82DD0D005F789E /* bf5.png */,
 				30FBFC831C81FCA600665F6C /* 3457.gif */,
 			);
 			path = Resource;
@@ -895,9 +917,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30B474B31C82DD0D005F789E /* bf5.png in Resources */,
+				30B474B11C82DD0D005F789E /* bf3.png in Resources */,
+				30B474B01C82DD0D005F789E /* bf2.png in Resources */,
 				30EAB0DB1C81F1D700E55D0F /* LaunchScreen.storyboard in Resources */,
+				30B474AF1C82DD0D005F789E /* bf1.png in Resources */,
 				30EAB0D81C81F1D700E55D0F /* Assets.xcassets in Resources */,
 				30EAB0D61C81F1D700E55D0F /* Main.storyboard in Resources */,
+				30B474B21C82DD0D005F789E /* bf4.png in Resources */,
 				30FBFC871C81FCA600665F6C /* 3457.gif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -958,6 +985,7 @@
 				30FB00121C82058900665F6C /* IDPView.m in Sources */,
 				30B474A81C824620005F789E /* UIImage+FloodFill.m in Sources */,
 				30FBFFF81C82058800665F6C /* IDPOCStack.m in Sources */,
+				30040BA51C8360C0003CB404 /* FFVectorPoints.mm in Sources */,
 				30FBFFF31C82058800665F6C /* IDPMutableArray.m in Sources */,
 				30FB00011C82058800665F6C /* IDPURLConnection.m in Sources */,
 				30FBFFF11C82058800665F6C /* IDPModel.m in Sources */,
